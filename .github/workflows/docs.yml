@@ -35,6 +35,22 @@ jobs:
             --transform-for-static-hosting \
             --hosting-base-path /
 
+      - name: Add root redirect to documentation
+        run: |
+          cat > ./docs/index.html <<'EOF'
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <meta http-equiv="refresh" content="0; url=/documentation/bloc/">
+              <link rel="canonical" href="/documentation/bloc/">
+            </head>
+            <body>
+              <p>Redirecting to <a href="/documentation/bloc/">documentation</a>…</p>
+            </body>
+          </html>
+          EOF
+
       - name: Add CNAME for custom domain
         run: echo "blocswift.thewalkingpuffin.com" > ./docs/CNAME
 
