@@ -1,8 +1,7 @@
 # Bloc
 
-[![Swift 6.0](https://img.shields.io/badge/Swift-6.0-orange.svg)](https://swift.org)
-[![iOS 17+](https://img.shields.io/badge/iOS-17%2B-blue.svg)](https://developer.apple.com/ios/)
-[![macOS 14+](https://img.shields.io/badge/macOS-14%2B-blue.svg)](https://developer.apple.com/macos/)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fsergiofraile%2FBlocSwift%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/sergiofraile/BlocSwift)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fsergiofraile%2FBlocSwift%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/sergiofraile/BlocSwift)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Tests](https://github.com/sergiofraile/BlocSwift/actions/workflows/tests.yml/badge.svg)](https://github.com/sergiofraile/BlocSwift/actions/workflows/tests.yml)
 
@@ -712,3 +711,5 @@ This library is released under the Apache 2.0 license. See [LICENSE](LICENSE) fo
 ---
 
 **Built with ❤️ for the Swift community**
+
+[![Ko-Fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/sergiof)
