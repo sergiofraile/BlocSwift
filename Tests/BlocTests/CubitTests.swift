@@ -84,6 +84,7 @@ struct CubitTests {
         cubit.increment()
         cubit.increment()
         #expect(received == [0, 1, 2])
+        withExtendedLifetime(cancellables) {}
     }
 
     @Test func errorsPublisherReceivesErrors() {
@@ -95,6 +96,7 @@ struct CubitTests {
         cubit.addError(TestError.sample)
         #expect(errors.count == 1)
         #expect(errors.first as? TestError == .sample)
+        withExtendedLifetime(cancellables) {}
     }
 
     @Test func addErrorIsNoOpAfterClose() {

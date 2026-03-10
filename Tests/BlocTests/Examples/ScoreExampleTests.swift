@@ -74,6 +74,7 @@ struct ScoreExampleTests {
         for _ in 0..<12 { bloc.send(.addPoint) }
 
         #expect(milestones == [5, 10])
+        withExtendedLifetime(cancellables) {}
     }
 
     /// Mirrors the buildWhen tier-badge logic:
@@ -100,5 +101,6 @@ struct ScoreExampleTests {
 
         // Boundaries crossed at 10, 20
         #expect(tierChanges == [10, 20])
+        withExtendedLifetime(cancellables) {}
     }
 }

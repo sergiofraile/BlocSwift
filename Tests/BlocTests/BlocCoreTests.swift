@@ -152,6 +152,7 @@ struct BlocCoreTests {
         bloc.send(.increment)
         bloc.send(.decrement)
         #expect(received == [.increment, .decrement])
+        withExtendedLifetime(cancellables) {}
     }
 
     @Test func statePublisherEmitsCurrentValueOnSubscription() {
@@ -173,6 +174,7 @@ struct BlocCoreTests {
         bloc.send(.increment)
         bloc.send(.increment)
         #expect(received == [0, 1, 2])
+        withExtendedLifetime(cancellables) {}
     }
 
     @Test func errorsPublisherReceivesErrors() {
@@ -184,6 +186,7 @@ struct BlocCoreTests {
         bloc.addError(BlocTestError.sample)
         #expect(errors.count == 1)
         #expect(errors.first as? BlocTestError == .sample)
+        withExtendedLifetime(cancellables) {}
     }
 
     // MARK: Lifecycle Hooks

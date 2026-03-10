@@ -235,6 +235,7 @@ struct CalculatorExampleTests {
         #expect(bloc.state.hasError)
         #expect(errors.count == 1)
         #expect(errors.first is CalculatorError)
+        withExtendedLifetime(cancellables) {}
     }
 
     @Test("Clear resets the display to '0'")

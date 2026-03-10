@@ -137,5 +137,6 @@ struct FormulaOneExampleTests {
 
         if case .error = bloc.state { } else { Issue.record("Expected .error state") }
         #expect(errors.count == 1)
+        withExtendedLifetime(cancellables) {}
     }
 }

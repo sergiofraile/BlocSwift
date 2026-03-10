@@ -17,6 +17,10 @@ A Swift implementation of the [Bloc pattern](https://bloclibrary.dev/) for build
 * [Basic Usage](#basic-usage)
 * [Examples](#examples)
   * [Counter](#-counter-example)
+  * [Timer](#-timer-example)
+  * [Calculator](#-calculator-example)
+  * [Heartbeat](#-heartbeat-example)
+  * [Score](#-score-example)
   * [Formula One](#-formula-one-example)
   * [Lorcana](#-lorcana-example)
 * [Documentation](#documentation)
@@ -90,7 +94,7 @@ flowchart LR
     end
 
     subgraph CubitLayer["🧠 Cubit"]
-        Method["Public Method\n(e.g. increment())"]
+        Method["Public Method<br/>(e.g. increment())"]
         Emit["emit(state)"]
         Method --> Emit
     end
@@ -407,7 +411,17 @@ counterBloc.statePublisher
 
 ## Examples
 
-The project includes example implementations that demonstrate different complexity levels:
+The project includes seven example implementations, each highlighting a different library feature:
+
+| Example | Key Feature | Complexity |
+|---------|-------------|------------|
+| Counter | `HydratedBloc`, state persistence | Beginner |
+| Timer | `Cubit`, async tick loop | Beginner |
+| Calculator | Lifecycle hooks (`onEvent`, `onChange`, `onTransition`) | Intermediate |
+| Heartbeat | Scoped Bloc, `close()` on dismiss | Intermediate |
+| Score | `BlocListener`, `BlocConsumer` | Intermediate |
+| Formula One | Async network, enum states | Intermediate |
+| Lorcana | Debounced search, pagination, `BlocSelector` | Advanced |
 
 ### 🔢 Counter Example
 
@@ -428,6 +442,120 @@ Text("Counter: \(counterBloc.state)")
 // Send events
 counterBloc.send(.increment)
 ```
+
+### ⏱️ Timer Example
+
+A Cubit-based stopwatch — the simplest form of state management with no events required:
+
+| Aspect | Details |
+|--------|---------|
+| **State** | `struct` with elapsed time and running status |
+| **Patterns** | `Cubit`, async tick loop, `start` / `pause` / `reset` |
+
+**Location:** `BlocSwift/Examples/Timer/`
+
+```swift
+// Cubit — emit state directly, no events needed
+class TimerCubit: Cubit<TimerState> {
+    func start() {
+        Task { while state.isRunning { await tick() } }
+    }
+
+    func pause() { emit(state.paused()) }
+    func reset() { emit(.initial) }
+}
+```
+
+**Key Learnings:**
+- Use `Cubit` when there are no complex event flows to model
+- Emit state directly without defining event types
+- Keep async loops tied to state (`isRunning`) so they stop cleanly
+
+### 🔢 Calculator Example
+
+Demonstrates every lifecycle hook available on a Bloc:
+
+| Aspect | Details |
+|--------|---------|
+| **State** | Calculator display value and operation |
+| **Patterns** | `onEvent`, `onChange`, `onTransition`, `onError` overrides |
+
+**Location:** `BlocSwift/Examples/Calculator/`
+
+```swift
+class CalculatorBloc: Bloc<CalculatorState, CalculatorEvent> {
+    override func onEvent(_ event: CalculatorEvent) {
+        super.onEvent(event)
+        log("Event received: \(event)")
+    }
+
+    override func onTransition(_ transition: Transition<CalculatorState, CalculatorEvent>) {
+        super.onTransition(transition)
+        log("\(transition.currentState) → \(transition.nextState)")
+    }
+}
+```
+
+**Key Learnings:**
+- Override lifecycle hooks for logging, analytics, or debugging
+- `onChange` fires for every state change; `onTransition` includes the triggering event
+- `onError` lets you handle and recover from unexpected failures
+
+### 💓 Heartbeat Example
+
+Shows how to scope a Bloc to a single screen and clean it up on dismiss:
+
+| Aspect | Details |
+|--------|---------|
+| **State** | Heartbeat rate and active status |
+| **Patterns** | Scoped `BlocProvider`, `close()` lifecycle management |
+
+**Location:** `BlocSwift/Examples/Heartbeat/`
+
+```swift
+// Provide a Bloc scoped only to this screen
+HeartbeatView()
+    .blocProvider(HeartbeatBloc())
+
+// Inside the view — close() is called automatically on disappear
+.onDisappear { heartbeatBloc.close() }
+```
+
+**Key Learnings:**
+- Not all Blocs need to live at the app root — scope them to the screen that needs them
+- Always call `close()` when a scoped Bloc is no longer needed to cancel ongoing work
+- `BlocProvider` at the view level creates and disposes the Bloc with the view
+
+### 🏆 Score Example
+
+Demonstrates `BlocListener` for one-time side effects and `BlocConsumer` for combined listen + build:
+
+| Aspect | Details |
+|--------|---------|
+| **State** | Score value and tier (Bronze / Silver / Gold) |
+| **Patterns** | `BlocListener` for milestone alerts, `BlocConsumer` for tier badge |
+
+**Location:** `BlocSwift/Examples/Score/`
+
+```swift
+// BlocListener — react to state without rebuilding the view
+BlocListener<ScoreBloc, ScoreState>(
+    listenWhen: { previous, current in current.score % 10 == 0 },
+    listener: { state in showMilestoneAlert(state.score) }
+) { ... }
+
+// BlocConsumer — listen AND build in one place
+BlocConsumer<ScoreBloc, ScoreState>(
+    listenWhen: { _, current in current.tier != previous.tier },
+    listener: { state in animateTierBadge() },
+    builder: { state in TierBadgeView(tier: state.tier) }
+)
+```
+
+**Key Learnings:**
+- Use `BlocListener` for navigation, dialogs, toasts — anything that shouldn't affect the widget tree
+- Use `BlocConsumer` when the same state change needs both a side effect and a UI update
+- `listenWhen` / `buildWhen` prevent unnecessary listener calls and rebuilds
 
 ### 🏎️ Formula One Example
 

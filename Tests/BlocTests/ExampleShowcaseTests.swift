@@ -85,6 +85,7 @@ struct CounterBlocTests {
         bloc.send(.reset)
 
         #expect(history == [0, 1, 2, 0])
+        withExtendedLifetime(cancellables) {}
     }
 }
 
