@@ -257,9 +257,13 @@ struct LorcanaExampleTests {
         let service = MockLorcanaService(cards: cards)
         let bloc = LorcanaBloc(service: service)
 
-        // Debounce window is 50 ms — send a search and wait for it to settle
+        // Debounce window is 50 ms — send a search and wait for it to settle.
+        // Uses 500 ms (10× the debounce) to absorb CI task-scheduling variance:
+        // the handler spawns an inner Task that runs searchCards asynchronously,
+        // so the window must cover both the debounce timer AND that extra async hop.
         bloc.send(.search(query: "Elsa"))
-        try await Task.sleep(for: .milliseconds(150))
+        try await Task.sleep(for: .milliseconds(500))
+        await Task.yield() // drain any queued main-actor tasks before asserting
 
         #expect(bloc.state.searchQuery == "Elsa")
         #expect(bloc.state.cards.allSatisfy { $0.name.contains("Elsa") })

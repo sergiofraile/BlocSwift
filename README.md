@@ -654,7 +654,9 @@ Lorcana/
 
 ## Documentation
 
-The documentation is built with DocC. Generate it in Xcode via **Product → Build Documentation** (or `⌃⇧⌘D`).
+The full API reference is hosted at **[blocswift.thewalkingpuffin.com](https://blocswift.thewalkingpuffin.com)**.
+
+You can also generate the docs locally in Xcode via **Product → Build Documentation** (or `⌃⇧⌘D`).
 
 ### Articles
 
