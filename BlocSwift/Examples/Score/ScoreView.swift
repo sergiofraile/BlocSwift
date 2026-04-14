@@ -83,27 +83,45 @@ struct ScoreView: View {
     @State private var milestoneText: String? = nil
     @State private var dismissTask: Task<Void, Never>? = nil
     @State private var tierPulse = false
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
 
     var body: some View {
         ZStack {
             background
 
-            // BlocListener wraps all content. Its listener closure fires as a
-            // side-effect (showing the banner) without rebuilding anything inside.
             BlocListener(ScoreBloc.self,
                 listenWhen: { _, new in new > 0 && new % 5 == 0 }
             ) { state in
                 showMilestone("🎯 \(state) points!")
             } content: {
-                VStack(spacing: 40) {
-                    Spacer()
-                    featureBadgeRow
-                    scoreDisplay
-                    tierDisplay
-                    Spacer()
-                    actionButtons
+                if verticalSizeClass == .compact {
+                    // Landscape: score on left, tier + buttons on right
+                    HStack(spacing: Theme.Spacing.xxl) {
+                        VStack(spacing: Theme.Spacing.lg) {
+                            featureBadgeRow
+                            scoreDisplay
+                        }
+                        VStack(spacing: Theme.Spacing.xl) {
+                            Spacer()
+                            tierDisplay
+                            Spacer()
+                            actionButtons
+                            Spacer()
+                        }
+                    }
+                    .padding(.horizontal, 28)
+                } else {
+                    // Portrait: stacked
+                    VStack(spacing: 40) {
+                        Spacer()
+                        featureBadgeRow
+                        scoreDisplay
+                        tierDisplay
+                        Spacer()
+                        actionButtons
+                    }
+                    .padding(.horizontal, 28)
                 }
-                .padding(.horizontal, 28)
             }
         }
         .overlay(alignment: .top) {
@@ -116,6 +134,9 @@ struct ScoreView: View {
         .animation(.spring(response: 0.4, dampingFraction: 0.7), value: milestoneText != nil)
         .navigationTitle("Score Board")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(Color(red: 0.06, green: 0.06, blue: 0.10), for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
     }
 
     // MARK: - Milestone logic
@@ -183,7 +204,7 @@ struct ScoreView: View {
 
                 // Numeral gradient shifts with the current tier.
                 Text("\(bloc.state)")
-                    .font(.system(size: 100, weight: .thin, design: .rounded))
+                    .font(.system(size: verticalSizeClass == .compact ? 64 : 100, weight: .thin, design: .rounded))
                     .foregroundStyle(
                         LinearGradient(
                             colors: tier.gradientColors,
@@ -199,7 +220,7 @@ struct ScoreView: View {
                     .font(.system(size: 14, weight: .medium, design: .rounded))
                     .foregroundColor(.white.opacity(0.35))
             }
-            .padding(.vertical, 32)
+            .padding(.vertical, verticalSizeClass == .compact ? 12 : 32)
             .padding(.horizontal, 40)
             .background(
                 RoundedRectangle(cornerRadius: 24)

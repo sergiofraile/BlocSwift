@@ -11,31 +11,50 @@ struct TimerView: View {
     let timerCubit = BlocRegistry.resolve(TimerCubit.self)
 
     @State private var animateRing = false
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
 
     var body: some View {
         ZStack {
             background
 
-            VStack(spacing: 0) {
-                Spacer()
-                cubitBadge
-                    .padding(.bottom, Theme.Spacing.xxl)
+            if verticalSizeClass == .compact {
+                // Landscape: clock on left, controls on right
+                HStack(spacing: Theme.Spacing.xxxl) {
+                    clockFace
+                        .scaleEffect(0.6)
+                        .frame(width: 180, height: 180)
 
-                clockFace
-                    .padding(.bottom, Theme.Spacing.huge)
-
-                controls
-                    .padding(.bottom, Theme.Spacing.xxl)
-
-                Spacer()
-
-                footerNote
-                    .padding(.bottom, Theme.Spacing.xl)
+                    VStack(spacing: Theme.Spacing.xl) {
+                        Spacer()
+                        cubitBadge
+                        controls
+                        footerNote
+                        Spacer()
+                    }
+                }
+                .padding(.horizontal, Theme.Spacing.xxl)
+            } else {
+                // Portrait: stacked
+                VStack(spacing: 0) {
+                    Spacer()
+                    cubitBadge
+                        .padding(.bottom, Theme.Spacing.xxl)
+                    clockFace
+                        .padding(.bottom, Theme.Spacing.huge)
+                    controls
+                        .padding(.bottom, Theme.Spacing.xxl)
+                    Spacer()
+                    footerNote
+                        .padding(.bottom, Theme.Spacing.xl)
+                }
+                .padding(.horizontal, Theme.Spacing.xxl)
             }
-            .padding(.horizontal, Theme.Spacing.xxl)
         }
         .navigationTitle("Stopwatch")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(Color(red: 0.04, green: 0.07, blue: 0.06), for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
     }
 
     // MARK: - Background

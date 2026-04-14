@@ -21,21 +21,26 @@ struct HeartbeatView: View {
     /// A new instance is created each time the view appears from scratch.
     @State private var bloc = HeartbeatBloc()
 
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @State private var showingLog = false
+
     var body: some View {
-        GeometryReader { geo in
-            HStack(spacing: 0) {
-                MonitorPanel(bloc: bloc) {
-                    // "New Session" — explicitly close the current Bloc and start fresh.
-                    bloc.close()
-                    bloc = HeartbeatBloc()
-                    bloc.send(.start)
+        Group {
+            if horizontalSizeClass == .compact {
+                MonitorPanel(bloc: bloc, onNewSession: newSession)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                GeometryReader { geo in
+                    HStack(spacing: 0) {
+                        MonitorPanel(bloc: bloc, onNewSession: newSession)
+                            .frame(width: min(380, geo.size.width * 0.5))
+
+                        Divider().background(Theme.Palette.divider)
+
+                        LifecycleLogPanel(bloc: bloc)
+                            .frame(maxWidth: .infinity)
+                    }
                 }
-                .frame(width: min(380, geo.size.width * 0.5))
-
-                Divider().background(Theme.Palette.divider)
-
-                LifecycleLogPanel(bloc: bloc)
-                    .frame(maxWidth: .infinity)
             }
         }
         .background(
@@ -53,6 +58,24 @@ struct HeartbeatView: View {
         }
         .navigationTitle("Heartbeat — Scoped Lifecycle")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(Color(red: 0.04, green: 0.06, blue: 0.10), for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
+        .toolbar {
+            if horizontalSizeClass == .compact {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showingLog = true
+                    } label: {
+                        Image(systemName: "list.bullet.clipboard")
+                            .foregroundColor(Theme.Palette.textSecondary)
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $showingLog) {
+            HeartbeatLogSheet(bloc: bloc)
+        }
         .onAppear {
             if !bloc.state.isRunning && !bloc.isClosed {
                 bloc.send(.start)
@@ -62,6 +85,12 @@ struct HeartbeatView: View {
             bloc.close()
         }
     }
+
+    private func newSession() {
+        bloc.close()
+        bloc = HeartbeatBloc()
+        bloc.send(.start)
+    }
 }
 
 // MARK: - Monitor Panel
@@ -70,91 +99,126 @@ private struct MonitorPanel: View {
     let bloc: HeartbeatBloc
     let onNewSession: () -> Void
 
-    // Accent colour for this screen: green (active) / orange (closed)
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+
     private var accentColor: Color { bloc.isClosed ? .orange : Color(red: 0.3, green: 0.85, blue: 0.6) }
 
     var body: some View {
+        if verticalSizeClass == .compact {
+            landscapeLayout
+        } else {
+            portraitLayout
+        }
+    }
+
+    // MARK: Portrait
+
+    private var portraitLayout: some View {
         VStack(spacing: 0) {
             Spacer()
-
-            // Pulsing ring animation
             PulseRing(tickCount: bloc.state.tickCount, isClosed: bloc.isClosed)
                 .frame(width: 200, height: 200)
-
             Spacer().frame(height: Theme.Spacing.xxxl)
-
-            // Session stats
-            VStack(spacing: Theme.Spacing.sm) {
-                Text(bloc.isClosed ? "CLOSED" : bloc.state.formattedDuration)
-                    .font(Theme.Font.display(48, weight: .thin, design: .monospaced))
-                    .foregroundColor(bloc.isClosed ? .orange : Theme.Palette.textPrimary)
-                    .animation(.easeInOut(duration: 0.3), value: bloc.isClosed)
-                    .contentTransition(.numericText())
-
-                Text(bloc.isClosed
-                     ? "Navigate away to close automatically"
-                     : "\(bloc.state.tickCount) tick\(bloc.state.tickCount == 1 ? "" : "s")")
-                    .font(Theme.Font.body(.medium, .rounded))
-                    .foregroundColor(Theme.Palette.textQuaternary)
-            }
-
+            sessionStats
             Spacer().frame(height: Theme.Spacing.huge)
-
-            // Explanation card
-            VStack(alignment: .leading, spacing: 10) {
-                Label("Scoped Bloc Pattern", systemImage: "info.circle")
-                    .font(Theme.Font.footnote(.semibold, .rounded))
-                    .foregroundColor(Theme.Palette.textTertiary)
-
-                Text("This Bloc is **not** in BlocProvider. It is owned by the view via `@State` — created on appear, closed on disappear. Navigate away to trigger `close()` automatically, or tap New Session below.")
-                    .font(Theme.Font.caption(.regular, .rounded))
-                    .foregroundColor(Theme.Palette.textQuaternary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .padding(14)
-            .background(
-                RoundedRectangle(cornerRadius: Theme.Radius.lg, style: .continuous)
-                    .fill(Theme.Palette.surfaceSubtle)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: Theme.Radius.lg, style: .continuous)
-                            .stroke(Theme.Palette.border, lineWidth: 1)
-                    )
-            )
-            .padding(.horizontal, 28)
-
+            explanationCard
             Spacer().frame(height: Theme.Spacing.xxl)
-
-            // New Session button
-            Button(action: onNewSession) {
-                HStack(spacing: Theme.Spacing.sm) {
-                    Image(systemName: "arrow.clockwise.circle.fill")
-                    Text("New Session")
-                        .fontWeight(.semibold)
-                }
-                .font(Theme.Font.callout(.regular, .rounded))
-                .foregroundColor(Theme.Palette.textPrimary)
-                .padding(.horizontal, Theme.Spacing.xxl)
-                .padding(.vertical, Theme.Spacing.md)
-                .background(
-                    Capsule()
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    Color(red: 0.3, green: 0.7, blue: 1.0),
-                                    Color(red: 0.1, green: 0.5, blue: 0.9)
-                                ],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .shadow(color: Color(red: 0.1, green: 0.5, blue: 0.9).opacity(0.4), radius: 8, y: 4)
-                )
-            }
-            .buttonStyle(.plain)
-
+            newSessionButton
             Spacer()
         }
         .padding(.horizontal, Theme.Spacing.xl)
+    }
+
+    // MARK: Landscape
+
+    private var landscapeLayout: some View {
+        HStack(spacing: Theme.Spacing.xxxl) {
+            // Scaled-down ring
+            PulseRing(tickCount: bloc.state.tickCount, isClosed: bloc.isClosed)
+                .frame(width: 200, height: 200)
+                .scaleEffect(0.6)
+                .frame(width: 120, height: 120)
+
+            // Stats + button (no explanation card — not enough vertical space)
+            VStack(spacing: Theme.Spacing.xl) {
+                Spacer()
+                sessionStats
+                Spacer()
+                newSessionButton
+                Spacer()
+            }
+        }
+        .padding(.horizontal, Theme.Spacing.xxl)
+    }
+
+    // MARK: Shared sub-views
+
+    private var sessionStats: some View {
+        VStack(spacing: Theme.Spacing.sm) {
+            Text(bloc.isClosed ? "CLOSED" : bloc.state.formattedDuration)
+                .font(Theme.Font.display(48, weight: .thin, design: .monospaced))
+                .foregroundColor(bloc.isClosed ? .orange : Theme.Palette.textPrimary)
+                .animation(.easeInOut(duration: 0.3), value: bloc.isClosed)
+                .contentTransition(.numericText())
+
+            Text(bloc.isClosed
+                 ? "Navigate away to close automatically"
+                 : "\(bloc.state.tickCount) tick\(bloc.state.tickCount == 1 ? "" : "s")")
+                .font(Theme.Font.body(.medium, .rounded))
+                .foregroundColor(Theme.Palette.textQuaternary)
+        }
+    }
+
+    private var explanationCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label("Scoped Bloc Pattern", systemImage: "info.circle")
+                .font(Theme.Font.footnote(.semibold, .rounded))
+                .foregroundColor(Theme.Palette.textTertiary)
+
+            Text("This Bloc is **not** in BlocProvider. It is owned by the view via `@State` — created on appear, closed on disappear. Navigate away to trigger `close()` automatically, or tap New Session below.")
+                .font(Theme.Font.caption(.regular, .rounded))
+                .foregroundColor(Theme.Palette.textQuaternary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: Theme.Radius.lg, style: .continuous)
+                .fill(Theme.Palette.surfaceSubtle)
+                .overlay(
+                    RoundedRectangle(cornerRadius: Theme.Radius.lg, style: .continuous)
+                        .stroke(Theme.Palette.border, lineWidth: 1)
+                )
+        )
+        .padding(.horizontal, 28)
+    }
+
+    private var newSessionButton: some View {
+        Button(action: onNewSession) {
+            HStack(spacing: Theme.Spacing.sm) {
+                Image(systemName: "arrow.clockwise.circle.fill")
+                Text("New Session")
+                    .fontWeight(.semibold)
+            }
+            .font(Theme.Font.callout(.regular, .rounded))
+            .foregroundColor(Theme.Palette.textPrimary)
+            .padding(.horizontal, Theme.Spacing.xxl)
+            .padding(.vertical, Theme.Spacing.md)
+            .background(
+                Capsule()
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(red: 0.3, green: 0.7, blue: 1.0),
+                                Color(red: 0.1, green: 0.5, blue: 0.9)
+                            ],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .shadow(color: Color(red: 0.1, green: 0.5, blue: 0.9).opacity(0.4), radius: 8, y: 4)
+            )
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -414,6 +478,40 @@ private struct LifecycleFeatureBanner: View {
                     )
                 )
         )
+    }
+}
+
+// MARK: - Log Sheet (compact/portrait)
+
+private struct HeartbeatLogSheet: View {
+    let bloc: HeartbeatBloc
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            LifecycleLogPanel(bloc: bloc)
+                .background(
+                    LinearGradient(
+                        colors: [
+                            Color(red: 0.04, green: 0.06, blue: 0.10),
+                            Color(red: 0.06, green: 0.04, blue: 0.10)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .navigationTitle("Lifecycle Log")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbarBackground(Color(red: 0.04, green: 0.06, blue: 0.10), for: .navigationBar)
+                .toolbarBackground(.visible, for: .navigationBar)
+                .toolbarColorScheme(.dark, for: .navigationBar)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Done") { dismiss() }
+                            .fontWeight(.semibold)
+                    }
+                }
+        }
     }
 }
 

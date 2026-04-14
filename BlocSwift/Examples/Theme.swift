@@ -169,6 +169,40 @@ enum Theme {
     }
 }
 
+// MARK: - Shared Loading Spinner
+
+/// Animated arc spinner shared across all example screens.
+/// Pass the `colors` array matching the screen's accent to preserve
+/// each example's visual identity while sharing the animation logic.
+struct LoadingSpinnerView: View {
+    var colors: [Color] = [.accentColor]
+    var size: CGFloat = 56
+
+    @State private var rotation: Double = 0
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke((colors.first ?? .gray).opacity(0.2), lineWidth: 4)
+                .frame(width: size, height: size)
+
+            Circle()
+                .trim(from: 0, to: 0.3)
+                .stroke(
+                    LinearGradient(colors: colors, startPoint: .leading, endPoint: .trailing),
+                    style: StrokeStyle(lineWidth: 4, lineCap: .round)
+                )
+                .frame(width: size, height: size)
+                .rotationEffect(.degrees(rotation - 90))
+                .onAppear {
+                    withAnimation(.linear(duration: 1).repeatForever(autoreverses: false)) {
+                        rotation = 360
+                    }
+                }
+        }
+    }
+}
+
 // MARK: - Internal scaling primitive
 
 /// Platform-adaptive `Font.system` wrapper.

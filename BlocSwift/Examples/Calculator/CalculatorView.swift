@@ -11,17 +11,27 @@ import SwiftUI
 struct CalculatorView: View {
     let bloc = BlocRegistry.resolve(CalculatorBloc.self)
 
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @State private var showingLog = false
+
     var body: some View {
-        GeometryReader { geo in
-            HStack(spacing: 0) {
+        Group {
+            if horizontalSizeClass == .compact {
                 CalculatorPadView(bloc: bloc)
-                    .frame(width: min(360, geo.size.width * 0.5))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                GeometryReader { geo in
+                    HStack(spacing: 0) {
+                        CalculatorPadView(bloc: bloc)
+                            .frame(width: min(360, geo.size.width * 0.5))
 
-                Divider()
-                    .background(Theme.Palette.divider)
+                        Divider()
+                            .background(Theme.Palette.divider)
 
-                LifecycleLogView(bloc: bloc)
-                    .frame(maxWidth: .infinity)
+                        LifecycleLogView(bloc: bloc)
+                            .frame(maxWidth: .infinity)
+                    }
+                }
             }
         }
         .background(
@@ -36,6 +46,56 @@ struct CalculatorView: View {
         )
         .navigationTitle("Calculator — Lifecycle Hooks")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(Color(red: 0.05, green: 0.05, blue: 0.08), for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarColorScheme(.dark, for: .navigationBar)
+        .toolbar {
+            if horizontalSizeClass == .compact {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showingLog = true
+                    } label: {
+                        Image(systemName: "list.bullet.clipboard")
+                            .foregroundColor(Theme.Palette.textSecondary)
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $showingLog) {
+            LogSheet(bloc: bloc)
+        }
+    }
+}
+
+private struct LogSheet: View {
+    let bloc: CalculatorBloc
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            LifecycleLogView(bloc: bloc)
+                .background(
+                    LinearGradient(
+                        colors: [
+                            Color(red: 0.05, green: 0.05, blue: 0.08),
+                            Color(red: 0.07, green: 0.07, blue: 0.12)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .navigationTitle("Lifecycle Log")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbarBackground(Color(red: 0.05, green: 0.05, blue: 0.08), for: .navigationBar)
+                .toolbarBackground(.visible, for: .navigationBar)
+                .toolbarColorScheme(.dark, for: .navigationBar)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Done") { dismiss() }
+                            .fontWeight(.semibold)
+                    }
+                }
+        }
     }
 }
 
@@ -44,15 +104,19 @@ struct CalculatorView: View {
 private struct CalculatorPadView: View {
     let bloc: CalculatorBloc
 
-    private let buttonSpacing: CGFloat = 10
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+
+    private var isLandscape: Bool { verticalSizeClass == .compact }
+    private var buttonSpacing: CGFloat { isLandscape ? 5 : 10 }
+    private var vPad: CGFloat { isLandscape ? Theme.Spacing.xs : Theme.Spacing.xxl }
 
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
                 DisplayView(state: bloc.state)
                 .padding(.horizontal, Theme.Spacing.xl)
-                .padding(.top, Theme.Spacing.xxl)
-                .padding(.bottom, Theme.Spacing.lg)
+                .padding(.top, vPad)
+                .padding(.bottom, isLandscape ? Theme.Spacing.xxs : Theme.Spacing.lg)
 
             VStack(spacing: buttonSpacing) {
                 // Row 1: AC, +/−, %, ÷
@@ -106,7 +170,7 @@ private struct CalculatorPadView: View {
                 }
             }
             .padding(.horizontal, Theme.Spacing.xl)
-            .padding(.bottom, Theme.Spacing.xxl)
+            .padding(.bottom, vPad)
         }
         .opacity(bloc.isClosed ? 0.35 : 1.0)
         .animation(.easeInOut(duration: 0.3), value: bloc.isClosed)
@@ -139,6 +203,8 @@ private struct CalculatorPadView: View {
 private struct DisplayView: View {
     let state: CalculatorState
 
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+
     var body: some View {
         VStack(alignment: .trailing, spacing: Theme.Spacing.xxs) {
             // Pending operation indicator
@@ -168,7 +234,7 @@ private struct DisplayView: View {
                 .contentTransition(.numericText())
                 .animation(.spring(response: 0.25), value: state.displayValue)
         }
-        .padding(Theme.Spacing.lg)
+        .padding(verticalSizeClass == .compact ? Theme.Spacing.xs : Theme.Spacing.lg)
         .background(
             RoundedRectangle(cornerRadius: Theme.Radius.xxl)
                 .fill(Theme.Palette.surfaceSubtle)
@@ -200,6 +266,7 @@ private struct CalcButton: View {
     let action: () -> Void
 
     @State private var isPressed = false
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
 
     var body: some View {
         Button(action: {
@@ -230,7 +297,7 @@ private struct CalcButton: View {
         .animation(.easeInOut(duration: 0.15), value: isActive)
     }
 
-    private var buttonSize: CGFloat { 68 }
+    private var buttonSize: CGFloat { verticalSizeClass == .compact ? 44 : 68 }
 
     private var fillColor: Color {
         switch style {

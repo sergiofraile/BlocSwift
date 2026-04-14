@@ -116,25 +116,8 @@ struct FormulaOneView: View {
     // MARK: - Loading State
     private var loadingView: some View {
         VStack(spacing: Theme.Spacing.xxl) {
-            ZStack {
-                Circle()
-                    .stroke(Color.gray.opacity(0.3), lineWidth: 4)
-                    .frame(width: 60, height: 60)
-                
-                Circle()
-                    .trim(from: 0, to: 0.3)
-                    .stroke(
-                        LinearGradient(
-                            colors: [.red, .orange],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        ),
-                        style: StrokeStyle(lineWidth: 4, lineCap: .round)
-                    )
-                    .frame(width: 60, height: 60)
-                    .rotationEffect(.degrees(-90))
-            }
-            
+            LoadingSpinnerView(colors: [.red, .orange])
+
             Text("Loading Championship...")
                 .font(Theme.Font.subhead(.medium, .rounded))
                 .foregroundColor(.gray)

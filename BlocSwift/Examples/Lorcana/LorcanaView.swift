@@ -224,25 +224,8 @@ struct LorcanaView: View {
     
     private var loadingView: some View {
         VStack(spacing: Theme.Spacing.xl) {
-            ZStack {
-                Circle()
-                    .stroke(Color.purple.opacity(0.2), lineWidth: 4)
-                    .frame(width: 50, height: 50)
-                
-                Circle()
-                    .trim(from: 0, to: 0.3)
-                    .stroke(
-                        LinearGradient(
-                            colors: [.purple, .pink],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        ),
-                        style: StrokeStyle(lineWidth: 4, lineCap: .round)
-                    )
-                    .frame(width: 50, height: 50)
-                    .rotationEffect(.degrees(-90))
-            }
-            
+            LoadingSpinnerView(colors: [.purple, .pink])
+
             Text("Summoning cards...")
                 .font(Theme.Font.subhead(.medium, .rounded))
                 .foregroundColor(.gray)

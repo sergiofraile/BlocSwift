@@ -1,5 +1,7 @@
 # Bloc
 
+![BlocSwift](assets/banner.png)
+
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fsergiofraile%2FBlocSwift%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/sergiofraile/BlocSwift)
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2Fsergiofraile%2FBlocSwift%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/sergiofraile/BlocSwift)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
