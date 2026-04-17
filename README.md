@@ -708,7 +708,7 @@ This library is inspired by:
 
 ## License
 
-This library is released under the Apache 2.0 license. See [LICENSE](LICENSE) for details.
+This library is released under the Apache 2.0 license with an additional AI/ML restriction. See [LICENSE](LICENSE) and [LICENSE-AI-ADDENDUM](LICENSE-AI-ADDENDUM) for details.
 
 ---
 

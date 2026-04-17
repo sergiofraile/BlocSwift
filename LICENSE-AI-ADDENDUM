@@ -1,0 +1,20 @@
+AI/ML Restriction Addendum to the Apache License, Version 2.0
+
+Copyright 2026 Sergio Fraile
+
+This addendum applies to all files in this repository and supplements the
+Apache License, Version 2.0 (the "License") found in the LICENSE file.
+
+The rights granted under the License do not include the right to use the
+Work or any Derivative Works thereof for the purpose of training,
+fine-tuning, or otherwise improving machine learning or artificial
+intelligence models, systems, or services, whether commercial or
+non-commercial, without the explicit prior written permission of the
+copyright holder.
+
+This restriction applies to, but is not limited to, the use of the Work
+as training data, evaluation data, or any other input to machine learning
+processes.
+
+For the avoidance of doubt, this restriction does not apply to the use of
+AI tools by licensed users to interact with or develop the Work itself.
