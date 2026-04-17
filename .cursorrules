@@ -1,0 +1,108 @@
+# Bloc Pattern Library - Swift Implementation
+
+## Project Overview
+This is a Swift implementation of the Bloc pattern (inspired by https://bloclibrary.dev/), a state management pattern that separates business logic from presentation. The project structure consists of:
+
+1. **Bloc Library** (Swift Package): Located at `BlocSwift/Bloc/`
+   - Core library implementation in `BlocSwift/Bloc/Sources/Bloc/`
+   - This is the main library that should be developed following SOLID principles
+   - Platform support: iOS 16+, tvOS 16+, watchOS 9+, macOS 10.15+
+
+2. **Example Implementations**: Located at `BlocSwift/Examples/`
+   - These are example apps demonstrating how to use the Bloc library
+   - Examples include: Counter, Login, FormulaOne, etc.
+   - Examples import the Bloc library: `import Bloc`
+
+## Core Concepts
+- **Bloc**: A class that manages state and handles events (`Bloc<S: BlocState, E: BlocEvent>`)
+- **BlocState**: Protocol for state types
+- **BlocEvent**: Protocol for event types
+- **BlocBase**: Base protocol defining the Bloc interface
+- **Event Handlers**: Functions that map events to state changes using `on(_:handler:)`
+- **State Emission**: States are emitted using `emit(_:)` and published via `states: CurrentValueSubject`
+
+## Development Principles
+
+### SOLID Principles
+When developing or modifying the Bloc library, strictly adhere to SOLID principles:
+
+1. **Single Responsibility Principle (SRP)**
+   - Each class/struct should have one reason to change
+   - Separate concerns: event handling, state management, event publishing, etc.
+   - Example: `BlocBase` defines the interface, `Bloc` implements the behavior
+
+2. **Open/Closed Principle (OCP)**
+   - Classes should be open for extension but closed for modification
+   - Use protocols and inheritance appropriately
+   - Allow customization through `mapEventToState` override point
+
+3. **Liskov Substitution Principle (LSP)**
+   - Subtypes must be substitutable for their base types
+   - Any `Bloc` subclass should work wherever `BlocBase` is expected
+
+4. **Interface Segregation Principle (ISP)**
+   - Clients should not depend on interfaces they don't use
+   - Keep protocols focused and minimal (e.g., `BlocState`, `BlocEvent`)
+
+5. **Dependency Inversion Principle (DIP)**
+   - Depend on abstractions (protocols) not concrete implementations
+   - Use protocol-oriented programming where appropriate
+
+### Code Quality Guidelines
+- Use `@MainActor` for UI-related Bloc classes to ensure thread safety
+- Prefer Combine publishers for reactive state management
+- Use weak references in closures to avoid retain cycles
+- Keep the library API clean and minimal
+- Document public APIs with clear comments
+
+## Workflow Rules
+
+### When Modifying the Bloc Library
+1. **Always update examples** after making changes to the Bloc library
+2. **Test changes** by running the example apps to ensure they still work
+3. **Maintain backward compatibility** when possible, or clearly document breaking changes
+4. **Update tests** in `BlocSwift/Bloc/Tests/` when adding new features
+
+### When Working with Examples
+1. Examples should demonstrate best practices for using the Bloc library
+2. Examples should import the Bloc library: `import Bloc`
+3. Examples should follow the pattern:
+   - Define events conforming to `BlocEvent`
+   - Define states conforming to `BlocState` (or use simple types like `Int`)
+   - Create a Bloc subclass: `class MyBloc: Bloc<MyState, MyEvent>`
+   - Register event handlers in `init` using `self.on(_:handler:)`
+   - Use `BlocProvider` and `BlocBuilder` in SwiftUI views
+
+### File Organization
+- Library code: `BlocSwift/Bloc/Sources/Bloc/`
+- Example code: `BlocSwift/Examples/`
+- Tests: `BlocSwift/Bloc/Tests/`
+- Keep related files together (e.g., Bloc, Events, States in the same directory for examples)
+
+## Common Patterns
+
+### Creating a Bloc
+```swift
+class MyBloc: Bloc<MyState, MyEvent> {
+    override init(initialState: MyState) {
+        super.init(initialState: initialState)
+        
+        self.on(.someEvent) { event, emit in
+            // Handle event and emit new state
+            emit(newState)
+        }
+    }
+}
+```
+
+### Using in SwiftUI
+- Use `BlocProvider` to provide the Bloc to the view hierarchy
+- Use `BlocBuilder` to rebuild views when state changes
+- Access the Bloc via `@EnvironmentObject` or `BlocProvider.of(context:)`
+
+## Important Notes
+- The Bloc library is a Swift Package, so changes must maintain package compatibility
+- Examples depend on the Bloc library and will break if the API changes
+- Always verify examples compile and run after library changes
+- Follow Swift naming conventions and best practices
+- Use Combine for reactive programming patterns

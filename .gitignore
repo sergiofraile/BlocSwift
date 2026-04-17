@@ -1,0 +1,92 @@
+# Xcode
+#
+# gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
+
+## User settings
+xcuserdata/
+
+## Xcode 8 and earlier
+*.xcscmblueprint
+*.xccheckout
+
+## Xcode 4
+*.xcworkspace
+!*.xcworkspace/contents.xcworkspacedata
+
+## Xcode 5
+*.moved-aside
+
+## Obj-C/Swift specific
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+## App packaging
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+## Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Packages/
+# Note: *.xcodeproj should typically be committed
+# Note: Package.resolved should be committed for reproducible builds
+# Uncomment the line below if you want to ignore it
+# Package.resolved
+
+# Xcode build artifacts
+DerivedData/
+*.xcuserstate
+*.xcuserdatad
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# CocoaPods
+#
+# We recommend against adding the Pods directory to your .gitignore. However
+# you should judge for yourself, the pros and cons are mentioned at:
+# https://guides.cocoapods.org/using/using-cocoapods.html#should-i-check-the-pods-directory-into-source-control
+#
+# Pods/
+
+# Carthage
+Carthage/Build/
+Carthage/Checkouts/
+
+# fastlane
+#
+# It is recommended to not store the screenshots in the git repo.
+# Instead, use fastlane to re-generate the screenshots whenever they are needed.
+# For more information about the recommended setup visit:
+# https://docs.fastlane.tools/best-practices/source-control/#source-control
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Code Injection
+#
+# After new code Injection tools there's a generated folder /iOSInjectionProject
+# https://github.com/johnno1962/injectionforxcode
+iOSInjectionProject/
+
+# Note: .cursorrules should be committed to share project rules with the team
+
+# SUVify API Configuration
+# Contains sensitive API keys - do not commit!
+# Use Suvify.plist.example as a template
+BlocSwift/Suvify.plist
+
+# SUV example — private/internal example, kept locally only
+BlocSwift/Examples/SUVs/
+Tests/BlocTests/Examples/SUVExampleTests.swift
