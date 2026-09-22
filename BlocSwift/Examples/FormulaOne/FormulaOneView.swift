@@ -79,7 +79,7 @@ struct FormulaOneView: View {
                 Text("FORMULA 1")
                     .font(Theme.Font.callout(.bold))
                     .tracking(8)
-                    .foregroundColor(.gray)
+                    .foregroundColor(Theme.Palette.textTertiary)
                 
                 Text("Driver's Championship")
                     .font(Theme.Font.title(.bold, .rounded))
@@ -120,7 +120,7 @@ struct FormulaOneView: View {
 
             Text("Loading Championship...")
                 .font(Theme.Font.subhead(.medium, .rounded))
-                .foregroundColor(.gray)
+                .foregroundColor(Theme.Palette.textTertiary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -144,7 +144,7 @@ struct FormulaOneView: View {
                 }) {
                     Image(systemName: "xmark.circle.fill")
                         .font(Theme.Font.display(20))
-                        .foregroundColor(.gray)
+                        .foregroundColor(Theme.Palette.textSecondary)
                 }
             }
         }
@@ -176,11 +176,11 @@ struct FormulaOneView: View {
                         .foregroundColor(.cyan)
                     
                     Text("•")
-                        .foregroundColor(.gray.opacity(0.5))
-                    
+                        .foregroundColor(Theme.Palette.textQuaternary)
+
                     Text(driver.team.teamName)
                         .font(Theme.Font.footnote(.medium))
-                        .foregroundColor(.gray)
+                        .foregroundColor(Theme.Palette.textTertiary)
                 }
             }
             
@@ -193,7 +193,7 @@ struct FormulaOneView: View {
                     .foregroundColor(Theme.Palette.textPrimary)
                 Text("PTS")
                     .font(Theme.Font.tiny(.semibold))
-                    .foregroundColor(.gray)
+                    .foregroundColor(Theme.Palette.textTertiary)
             }
         }
         .padding(Theme.Spacing.lg)
@@ -233,7 +233,7 @@ struct FormulaOneView: View {
             
             Text(error.localizedDescription)
                 .font(Theme.Font.callout())
-                .foregroundColor(.gray)
+                .foregroundColor(Theme.Palette.textSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, Theme.Spacing.huge)
             

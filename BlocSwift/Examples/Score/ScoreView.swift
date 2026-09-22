@@ -183,7 +183,7 @@ struct ScoreView: View {
                 .foregroundColor(color)
             Text(text)
                 .font(.system(size: 13, weight: .medium, design: .rounded))
-                .foregroundColor(.white.opacity(0.75))
+                .foregroundColor(Theme.Palette.textSecondary)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 6)
@@ -200,7 +200,7 @@ struct ScoreView: View {
                 Text("SCORE")
                     .font(.system(size: 15, weight: .semibold, design: .monospaced))
                     .tracking(5)
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(Theme.Palette.textTertiary)
 
                 // Numeral gradient shifts with the current tier.
                 Text("\(bloc.state)")
@@ -218,7 +218,7 @@ struct ScoreView: View {
 
                 Text("Next milestone at \(nextMilestone(for: bloc.state)) pts")
                     .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundColor(.white.opacity(0.35))
+                    .foregroundColor(Theme.Palette.textQuaternary)
             }
             .padding(.vertical, verticalSizeClass == .compact ? 12 : 32)
             .padding(.horizontal, 40)
@@ -277,7 +277,7 @@ struct ScoreView: View {
                         .foregroundColor(tier.color)
                     Text(tierSubtitle(tier))
                         .font(.system(size: 13, weight: .medium, design: .rounded))
-                        .foregroundColor(.white.opacity(0.5))
+                        .foregroundColor(Theme.Palette.textTertiary)
                 }
             }
             .padding(.horizontal, 20)
@@ -317,7 +317,7 @@ struct ScoreView: View {
                     Text("Score!")
                         .font(.system(size: 20, weight: .semibold, design: .rounded))
                 }
-                .foregroundColor(.white)
+                .foregroundColor(Theme.Palette.textPrimary)
                 .frame(maxWidth: 280)
                 .padding(.vertical, 16)
                 .background(
@@ -344,7 +344,7 @@ struct ScoreView: View {
                     Text("Reset")
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
                 }
-                .foregroundColor(.white.opacity(0.6))
+                .foregroundColor(Theme.Palette.textSecondary)
                 .padding(.horizontal, 24)
                 .padding(.vertical, 10)
                 .background(
@@ -357,7 +357,7 @@ struct ScoreView: View {
 
             Text("Every 5 pts → BlocListener fires. Tier badge: BlocConsumer rebuilds + animates at 10, 20, 30 pts.")
                 .font(.system(size: 13, weight: .regular, design: .rounded))
-                .foregroundColor(.white.opacity(0.30))
+                .foregroundColor(Theme.Palette.textQuaternary)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 300)
                 .padding(.top, 4)
@@ -377,7 +377,7 @@ struct ScoreView: View {
                 )
             Text(text)
                 .font(.system(size: 16, weight: .semibold, design: .rounded))
-                .foregroundColor(.white)
+                .foregroundColor(Theme.Palette.textPrimary)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 11)

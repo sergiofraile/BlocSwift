@@ -171,7 +171,7 @@ struct TimerView: View {
                 .font(.system(size: 68, weight: .thin, design: .monospaced))
                 .foregroundStyle(
                     LinearGradient(
-                        colors: [.white, .white.opacity(0.85)],
+                        colors: [Theme.Palette.textPrimary, Theme.Palette.textPrimary.opacity(0.85)],
                         startPoint: .top,
                         endPoint: .bottom
                     )
@@ -185,7 +185,7 @@ struct TimerView: View {
                         .contentTransition(.numericText())
                 }
                 .font(.system(size: 28, weight: .light, design: .monospaced))
-                .foregroundColor(.white.opacity(0.55))
+                .foregroundColor(Theme.Palette.textTertiary)
                 .animation(.spring(response: 0.15), value: timerCubit.state.centisecondsDisplay)
                 .padding(.top, -6)
             }
@@ -207,7 +207,7 @@ struct TimerView: View {
                         )
                     Image(systemName: "arrow.counterclockwise")
                         .font(Theme.Font.body(.semibold))
-                        .foregroundColor(.white.opacity(0.7))
+                        .foregroundColor(Theme.Palette.textSecondary)
                 }
             }
             .buttonStyle(.plain)
@@ -245,7 +245,7 @@ struct TimerView: View {
 
                     Image(systemName: timerCubit.state.isRunning ? "pause.fill" : "play.fill")
                         .font(.system(size: 26, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(Theme.Palette.textPrimary)
                         .offset(x: timerCubit.state.isRunning ? 0 : 2)
                         .animation(.spring(response: 0.25), value: timerCubit.state.isRunning)
                 }

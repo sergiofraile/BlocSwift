@@ -88,7 +88,7 @@ class CalculatorBloc: Bloc<CalculatorState, CalculatorEvent> {
 
     override func onError(_ error: Error) {
         super.onError(error)
-        lifecycleLog.append(kind: .error, message: error.localizedDescription ?? "\(error)")
+        lifecycleLog.append(kind: .error, message: error.localizedDescription)
     }
 
     override func onClose() {

@@ -138,7 +138,7 @@ struct ExamplesSplitView: View {
             
             Text("State Management Patterns")
                 .font(Theme.Font.caption(.medium, .rounded))
-                .foregroundColor(.secondary)
+                .foregroundColor(Theme.Palette.textTertiary)
                 .tracking(1.5)
                 .textCase(.uppercase)
         }
@@ -260,7 +260,7 @@ struct ExamplesSplitView: View {
                 
                 Text("Built with Swift")
                     .font(Theme.Font.caption(.medium, .rounded))
-                    .foregroundColor(.secondary)
+                    .foregroundColor(Theme.Palette.textTertiary)
             }
             .padding(.vertical, Theme.Spacing.md)
         }
@@ -399,7 +399,7 @@ struct WelcomeDetailView: View {
                     
                     Text("Select an example from the sidebar to explore different state management patterns")
                         .font(Theme.Font.display(15, weight: .medium, design: .rounded))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Theme.Palette.textSecondary)
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: 400)
                 }

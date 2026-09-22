@@ -66,7 +66,7 @@ struct LorcanaView: View {
                     .foregroundColor(.gray)
                     .font(Theme.Font.subhead())
                 
-                TextField("Search cards...", text: $searchText)
+                TextField("", text: $searchText, prompt: Text("Search cards...").foregroundColor(Theme.Palette.textTertiary))
                     .foregroundColor(Theme.Palette.textPrimary)
                     .autocorrectionDisabled()
                     .textInputAutocapitalization(.never)

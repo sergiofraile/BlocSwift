@@ -23,8 +23,8 @@ class CounterBloc: HydratedBloc<Int, CounterEvent> {
         static let initialState: Int = 0
     }
 
-    init() {
-        super.init(initialState: Consts.initialState)
+    override init(initialState: Int = Consts.initialState, storage: HydratedStorage = UserDefaultsStorage.shared) {
+        super.init(initialState: initialState, storage: storage)
 
         on(.increment) { [weak self] _, emit in
             guard let self else { return }

@@ -18,12 +18,14 @@ class LorcanaBloc: Bloc<LorcanaState, LorcanaEvent> {
 
     private let networkService: any LorcanaNetworkServiceProtocol
     private let pageSize = 100
+    private var searchTask: Task<Void, Never>?
 
     init(networkService: any LorcanaNetworkServiceProtocol) {
         self.networkService = networkService
         super.init(initialState: .initial)
 
-        on(.clear) { _, emit in
+        on(.clear) { [weak self] _, emit in
+            self?.searchTask?.cancel()
             emit(.initial)
         }
 
@@ -50,7 +52,8 @@ class LorcanaBloc: Bloc<LorcanaState, LorcanaEvent> {
             transformer: .debounce(.milliseconds(300))
         ) { [weak self] event, _ in
             guard let self, case .search(let query) = event else { return }
-            Task { await self.searchCards(query: query) }
+            self.searchTask?.cancel()
+            self.searchTask = Task { await self.searchCards(query: query) }
         }
 
         on(
@@ -132,12 +135,16 @@ class LorcanaBloc: Bloc<LorcanaState, LorcanaEvent> {
 
         do {
             let cards = try await networkService.searchCards(query: query, page: 1, pageSize: pageSize)
+            guard !Task.isCancelled else { return }
             var loadedState = state
             loadedState.cards = cards
             loadedState.isLoading = false
             loadedState.hasMorePages = cards.count == pageSize
             emit(loadedState)
+        } catch is CancellationError {
+            // Superseded by a newer search — leave state alone.
         } catch {
+            guard !Task.isCancelled else { return }
             addError(error)
             var errorState = state
             errorState.isLoading = false

@@ -23,7 +23,7 @@ final class LorcanaNetworkService: LorcanaNetworkServiceProtocol, @unchecked Sen
     /// - Returns: Array of Lorcana cards
     func fetchAllCards(page: Int = 1, pageSize: Int = Constants.defaultPageSize) async throws -> [LorcanaCard] {
         let url = "\(Constants.baseURL)/cards/all"
-        let parameters: [String: Any] = [
+        let parameters: [String: any Sendable] = [
             "page": page,
             "pagesize": pageSize
         ]
@@ -47,7 +47,7 @@ final class LorcanaNetworkService: LorcanaNetworkServiceProtocol, @unchecked Sen
         // The ~ operator is for partial/contains matching: name~daisy
         let url = "\(Constants.baseURL)/cards/fetch"
         let searchQuery = "name~\(query)"
-        let parameters: [String: Any] = [
+        let parameters: [String: any Sendable] = [
             "search": searchQuery,
             "page": page,
             "pagesize": pageSize
@@ -70,7 +70,7 @@ final class LorcanaNetworkService: LorcanaNetworkServiceProtocol, @unchecked Sen
     func fetchCardsFromSet(setName: String, page: Int = 1, pageSize: Int = Constants.defaultPageSize) async throws -> [LorcanaCard] {
         let url = "\(Constants.baseURL)/cards/fetch"
         let searchQuery = "set_name=\(setName)"
-        let parameters: [String: Any] = [
+        let parameters: [String: any Sendable] = [
             "search": searchQuery,
             "page": page,
             "pagesize": pageSize

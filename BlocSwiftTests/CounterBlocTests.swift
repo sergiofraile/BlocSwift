@@ -7,7 +7,20 @@
 
 import Testing
 import Combine
+import Foundation
+import Bloc
 @testable import BlocSwift
+
+/// A lightweight, dictionary-backed HydratedStorage for unit tests.
+/// Eliminates any dependency on UserDefaults, keeping tests hermetic.
+final class InMemoryStorage: HydratedStorage, @unchecked Sendable {
+    private var store: [String: Data] = [:]
+
+    func read(key: String) -> Data? { store[key] }
+    func write(key: String, value: Data) { store[key] = value }
+    func delete(key: String) { store[key] = nil }
+    func clear() { store.removeAll() }
+}
 
 /// Tests for `CounterBloc` following the Bloc pattern testing best practices.
 ///
@@ -16,16 +29,20 @@ import Combine
 /// - Events produce expected state changes
 /// - State transitions are predictable
 ///
+/// Each test injects its own `InMemoryStorage` since `CounterBloc` is a
+/// `HydratedBloc` that would otherwise persist to (and rehydrate from) the
+/// real `UserDefaults`, leaking state between tests.
+///
 /// Reference: https://bloclibrary.dev/testing/
 @MainActor
 struct CounterBlocTests {
-    
+
     // MARK: - Initial State Tests
     
     @Test("Initial state should be 0")
     func initialStateIsZero() async throws {
         // Arrange & Act
-        let counterBloc = CounterBloc()
+        let counterBloc = CounterBloc(storage: InMemoryStorage())
         
         // Assert
         #expect(counterBloc.state == 0)
@@ -34,7 +51,7 @@ struct CounterBlocTests {
     @Test("Initial state can be customized")
     func customInitialState() async throws {
         // Arrange & Act
-        let counterBloc = CounterBloc(initialState: 10)
+        let counterBloc = CounterBloc(initialState: 10, storage: InMemoryStorage())
         
         // Assert
         #expect(counterBloc.state == 10)
@@ -45,7 +62,7 @@ struct CounterBlocTests {
     @Test("Emits 1 when increment is sent from initial state")
     func incrementFromInitialState() async throws {
         // Arrange
-        let counterBloc = CounterBloc()
+        let counterBloc = CounterBloc(storage: InMemoryStorage())
         
         // Act
         counterBloc.send(.increment)
@@ -57,7 +74,7 @@ struct CounterBlocTests {
     @Test("Emits 11 when increment is sent from state 10")
     func incrementFromCustomState() async throws {
         // Arrange
-        let counterBloc = CounterBloc(initialState: 10)
+        let counterBloc = CounterBloc(initialState: 10, storage: InMemoryStorage())
         
         // Act
         counterBloc.send(.increment)
@@ -69,7 +86,7 @@ struct CounterBlocTests {
     @Test("Multiple increments accumulate correctly")
     func multipleIncrements() async throws {
         // Arrange
-        let counterBloc = CounterBloc()
+        let counterBloc = CounterBloc(storage: InMemoryStorage())
         
         // Act
         counterBloc.send(.increment)
@@ -85,7 +102,7 @@ struct CounterBlocTests {
     @Test("Emits -1 when decrement is sent from initial state")
     func decrementFromInitialState() async throws {
         // Arrange
-        let counterBloc = CounterBloc()
+        let counterBloc = CounterBloc(storage: InMemoryStorage())
         
         // Act
         counterBloc.send(.decrement)
@@ -97,7 +114,7 @@ struct CounterBlocTests {
     @Test("Emits 9 when decrement is sent from state 10")
     func decrementFromCustomState() async throws {
         // Arrange
-        let counterBloc = CounterBloc(initialState: 10)
+        let counterBloc = CounterBloc(initialState: 10, storage: InMemoryStorage())
         
         // Act
         counterBloc.send(.decrement)
@@ -109,7 +126,7 @@ struct CounterBlocTests {
     @Test("Multiple decrements accumulate correctly")
     func multipleDecrements() async throws {
         // Arrange
-        let counterBloc = CounterBloc()
+        let counterBloc = CounterBloc(storage: InMemoryStorage())
         
         // Act
         counterBloc.send(.decrement)
@@ -125,7 +142,7 @@ struct CounterBlocTests {
     @Test("Emits 0 when reset is sent")
     func resetToZero() async throws {
         // Arrange
-        let counterBloc = CounterBloc(initialState: 100)
+        let counterBloc = CounterBloc(initialState: 100, storage: InMemoryStorage())
         
         // Act
         counterBloc.send(.reset)
@@ -137,7 +154,7 @@ struct CounterBlocTests {
     @Test("Reset after increments returns to initial state")
     func resetAfterIncrements() async throws {
         // Arrange
-        let counterBloc = CounterBloc()
+        let counterBloc = CounterBloc(storage: InMemoryStorage())
         counterBloc.send(.increment)
         counterBloc.send(.increment)
         counterBloc.send(.increment)
@@ -152,7 +169,7 @@ struct CounterBlocTests {
     @Test("Reset after decrements returns to initial state")
     func resetAfterDecrements() async throws {
         // Arrange
-        let counterBloc = CounterBloc()
+        let counterBloc = CounterBloc(storage: InMemoryStorage())
         counterBloc.send(.decrement)
         counterBloc.send(.decrement)
         
@@ -168,7 +185,7 @@ struct CounterBlocTests {
     @Test("Mixed events produce correct final state")
     func mixedEvents() async throws {
         // Arrange
-        let counterBloc = CounterBloc()
+        let counterBloc = CounterBloc(storage: InMemoryStorage())
         
         // Act: increment 3 times, decrement 1 time -> expected state is 2
         counterBloc.send(.increment)
@@ -183,7 +200,7 @@ struct CounterBlocTests {
     @Test("Complex sequence of events")
     func complexEventSequence() async throws {
         // Arrange
-        let counterBloc = CounterBloc(initialState: 5)
+        let counterBloc = CounterBloc(initialState: 5, storage: InMemoryStorage())
         
         // Act
         counterBloc.send(.increment)  // 6
@@ -201,7 +218,7 @@ struct CounterBlocTests {
     @Test("State publisher emits correct values")
     func statePublisherEmitsValues() async throws {
         // Arrange
-        let counterBloc = CounterBloc()
+        let counterBloc = CounterBloc(storage: InMemoryStorage())
         var emittedStates: [Int] = []
         var cancellables = Set<AnyCancellable>()
         
