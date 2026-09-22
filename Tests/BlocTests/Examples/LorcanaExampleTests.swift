@@ -7,6 +7,8 @@
 //   - Pagination (loadNextPage appends results, tracks hasMorePages)
 //   - Debounced search with on(where:transformer:) — only fires after 300 ms quiet period
 //   - Set browsing
+//   - Task cancellation: a new search cancels the previous in-flight one, so a
+//     slower stale response can't overwrite a newer result
 //
 // These tests drive the Bloc through mock services and demonstrate that
 // even complex async state management remains straightforward to verify.
@@ -90,6 +92,30 @@ private struct MockLorcanaService: LorcanaNetworkServiceProtocol {
     }
 }
 
+/// A mock whose `searchCards` can be told to take longer for specific queries —
+/// used to simulate a slow, stale response arriving after a faster newer one.
+private actor DelayedLorcanaService: LorcanaNetworkServiceProtocol {
+    private let cards: [Card]
+    private let delaysByQuery: [String: Duration]
+
+    init(cards: [Card], delaysByQuery: [String: Duration] = [:]) {
+        self.cards = cards
+        self.delaysByQuery = delaysByQuery
+    }
+
+    func fetchAllCards(page: Int, pageSize: Int) async throws -> [Card] { cards }
+
+    func searchCards(query: String, page: Int, pageSize: Int) async throws -> [Card] {
+        if let delay = delaysByQuery[query] {
+            try await Task.sleep(for: delay)
+        }
+        return cards.filter { $0.name.lowercased().contains(query.lowercased()) }
+    }
+
+    func fetchCardsFromSet(setName: String, page: Int, pageSize: Int) async throws -> [Card] { cards }
+    func fetchSets() async throws -> [CardSet] { [] }
+}
+
 // MARK: - Inline replica of LorcanaBloc
 
 @MainActor
@@ -97,12 +123,16 @@ private class LorcanaBloc: Bloc<LorcanaState, LorcanaEvent> {
 
     private let service: any LorcanaNetworkServiceProtocol
     private let pageSize = 10
+    private var searchTask: Task<Void, Never>?
 
     init(service: any LorcanaNetworkServiceProtocol) {
         self.service = service
         super.init(initialState: .initial)
 
-        on(.clear) { _, emit in emit(.initial) }
+        on(.clear) { [weak self] _, emit in
+            self?.searchTask?.cancel()
+            emit(.initial)
+        }
 
         on(.fetchAllCards) { [weak self] _, _ in
             guard let self else { return }
@@ -124,7 +154,8 @@ private class LorcanaBloc: Bloc<LorcanaState, LorcanaEvent> {
             transformer: .debounce(.milliseconds(50))
         ) { [weak self] event, _ in
             guard let self, case .search(let query) = event else { return }
-            Task { await self.searchCards(query: query) }
+            self.searchTask?.cancel()
+            self.searchTask = Task { await self.searchCards(query: query) }
         }
     }
 
@@ -169,10 +200,14 @@ private class LorcanaBloc: Bloc<LorcanaState, LorcanaEvent> {
         emit(s)
         do {
             let cards = try await service.searchCards(query: query, page: 1, pageSize: pageSize)
+            guard !Task.isCancelled else { return }
             var loaded = state; loaded.cards = cards; loaded.isLoading = false
             loaded.hasMorePages = cards.count == pageSize
             emit(loaded)
+        } catch is CancellationError {
+            // Superseded by a newer search — leave state alone.
         } catch {
+            guard !Task.isCancelled else { return }
             addError(error)
             var errState = state; errState.isLoading = false; errState.error = error.localizedDescription
             emit(errState)
@@ -267,5 +302,27 @@ struct LorcanaExampleTests {
 
         #expect(bloc.state.searchQuery == "Elsa")
         #expect(bloc.state.cards.allSatisfy { $0.name.contains("Elsa") })
+    }
+
+    @Test("a newer search is not clobbered by a slower, stale response from an earlier search")
+    func newerSearchWinsOverSlowerStaleResponse() async throws {
+        let cards = [
+            Card(id: "1", name: "Elsa - Snow Queen"),
+            Card(id: "2", name: "Mickey Mouse"),
+        ]
+        // "Els" resolves slowly; "Mic" resolves immediately. Without cancelling
+        // the in-flight "Els" request, its late response would land after
+        // "Mic"'s and clobber the state with the wrong results.
+        let service = DelayedLorcanaService(cards: cards, delaysByQuery: ["Els": .milliseconds(300)])
+        let bloc = LorcanaBloc(service: service)
+
+        bloc.send(.search(query: "Els"))
+        try await Task.sleep(for: .milliseconds(100)) // let the "Els" debounce fire and dispatch the slow request
+        bloc.send(.search(query: "Mic"))
+        try await Task.sleep(for: .milliseconds(500)) // long enough for both debounce windows and the slow response
+        await Task.yield()
+
+        #expect(bloc.state.searchQuery == "Mic")
+        #expect(bloc.state.cards.allSatisfy { $0.name.contains("Mickey") })
     }
 }
