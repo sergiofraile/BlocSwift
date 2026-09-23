@@ -10,6 +10,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [1.1.2] - 2026-09-23
+
+Licensing cleanup. No changes to the `Bloc` library itself.
+
+### Changed
+- `LICENSE` restored to the verbatim Apache 2.0 text (a few clauses had drifted from the official wording), so GitHub and Swift Package Index detect it as Apache-2.0
+- Removed the AI/ML training-restriction addendum; the project is now licensed under plain Apache 2.0
+
+---
+
 ## [1.1.1] - 2026-09-22
 
 Demo app fixes and design-system consistency pass. No changes to the `Bloc` library itself.
@@ -79,7 +89,8 @@ Initial public release.
 
 ---
 
-[Unreleased]: https://github.com/sergiofraile/BlocSwift/compare/v1.1.1...HEAD
+[Unreleased]: https://github.com/sergiofraile/BlocSwift/compare/v1.1.2...HEAD
+[1.1.2]: https://github.com/sergiofraile/BlocSwift/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/sergiofraile/BlocSwift/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/sergiofraile/BlocSwift/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/sergiofraile/BlocSwift/releases/tag/v1.0.0
