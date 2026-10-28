@@ -112,7 +112,8 @@ struct ScoreView: View {
                     .padding(.horizontal, 28)
                 } else {
                     // Portrait: stacked — tightens up on short screens (e.g. iPhone Duo cover display)
-                    HeightAdaptiveStack { dense in
+                    // Taller layout than the other examples, so go dense a bit earlier
+                    HeightAdaptiveStack(denseBelow: 760) { dense in
                         VStack(spacing: dense ? Theme.Spacing.xl : 40) {
                             Spacer()
                             featureBadgeRow
@@ -122,7 +123,7 @@ struct ScoreView: View {
                             actionButtons
                         }
                         .padding(.horizontal, 28)
-                        .padding(.bottom, dense ? Theme.Spacing.lg : 0)
+                        .padding(.bottom, Theme.Spacing.lg)
                     }
                 }
             }
