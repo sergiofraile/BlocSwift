@@ -347,93 +347,106 @@ private struct LifecycleLogView: View {
 
     private var log: BlocLifecycleLog { bloc.lifecycleLog }
 
+    private func legendPills(showLabels: Bool) -> some View {
+        HStack(spacing: Theme.Spacing.xs) {
+            ForEach([
+                BlocLifecycleLog.LogEntry.Kind.event,
+                .change,
+                .transition,
+                .error,
+                .close
+            ], id: \.label) { kind in
+                HStack(spacing: Theme.Spacing.xxs) {
+                    Image(systemName: kind.symbol)
+                        .font(Theme.Font.micro(.bold))
+                    if showLabels {
+                        Text(kind.label)
+                            .font(Theme.Font.micro(.semibold, .rounded))
+                    }
+                }
+                .foregroundColor(kind.color)
+                .padding(.horizontal, Theme.Spacing.xs)
+                .padding(.vertical, Theme.Spacing.xxxs)
+                .background(
+                    Capsule().fill(kind.color.opacity(0.12))
+                )
+                .fixedSize()
+            }
+        }
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             // Header
-            HStack {
-                VStack(alignment: .leading, spacing: Theme.Spacing.xxs) {
-                    HStack(spacing: Theme.Spacing.xs) {
-                        Text("Lifecycle Log")
-                            .font(Theme.Font.callout(.semibold, .rounded))
-                            .foregroundColor(Theme.Palette.textPrimary)
+            VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
+                HStack {
+                    VStack(alignment: .leading, spacing: Theme.Spacing.xxs) {
+                        HStack(spacing: Theme.Spacing.xs) {
+                            Text("Lifecycle Log")
+                                .font(Theme.Font.callout(.semibold, .rounded))
+                                .foregroundColor(Theme.Palette.textPrimary)
 
-                        // Status badge
-                        HStack(spacing: Theme.Spacing.xxs) {
-                            Circle()
-                                .fill(bloc.isClosed ? Color.orange : Color.green)
-                                .frame(width: 6, height: 6)
-                            Text(bloc.isClosed ? "CLOSED" : "ACTIVE")
-                                .font(Theme.Font.micro(.bold, .rounded))
-                                .foregroundColor(bloc.isClosed ? .orange : .green)
+                            // Status badge
+                            HStack(spacing: Theme.Spacing.xxs) {
+                                Circle()
+                                    .fill(bloc.isClosed ? Color.orange : Color.green)
+                                    .frame(width: 6, height: 6)
+                                Text(bloc.isClosed ? "CLOSED" : "ACTIVE")
+                                    .font(Theme.Font.micro(.bold, .rounded))
+                                    .foregroundColor(bloc.isClosed ? .orange : .green)
+                            }
+                            .padding(.horizontal, Theme.Spacing.xs)
+                            .padding(.vertical, Theme.Spacing.xxxs)
+                            .background(
+                                Capsule().fill((bloc.isClosed ? Color.orange : Color.green).opacity(0.12))
+                            )
                         }
-                        .padding(.horizontal, Theme.Spacing.xs)
-                        .padding(.vertical, Theme.Spacing.xxxs)
-                        .background(
-                            Capsule().fill((bloc.isClosed ? Color.orange : Color.green).opacity(0.12))
-                        )
+                        Text("\(log.entries.count) events")
+                            .font(Theme.Font.caption(.medium, .rounded))
+                            .foregroundColor(Theme.Palette.textDisabled)
                     }
-                    Text("\(log.entries.count) events")
-                        .font(Theme.Font.caption(.medium, .rounded))
-                        .foregroundColor(Theme.Palette.textDisabled)
-                }
 
-                Spacer()
+                    Spacer()
 
-                // Legend pills
-                HStack(spacing: Theme.Spacing.xs) {
-                    ForEach([
-                        BlocLifecycleLog.LogEntry.Kind.event,
-                        .change,
-                        .transition,
-                        .error,
-                        .close
-                    ], id: \.label) { kind in
-                        HStack(spacing: Theme.Spacing.xxs) {
-                            Image(systemName: kind.symbol)
-                                .font(Theme.Font.micro(.bold))
-                            Text(kind.label)
-                                .font(Theme.Font.micro(.semibold, .rounded))
-                        }
-                        .foregroundColor(kind.color)
-                        .padding(.horizontal, Theme.Spacing.xs)
-                        .padding(.vertical, Theme.Spacing.xxxs)
-                        .background(
-                            Capsule().fill(kind.color.opacity(0.12))
-                        )
+                    // Close bloc button (disabled once already closed)
+                    Button {
+                        showingCloseConfirm = true
+                    } label: {
+                        Image(systemName: "stop.circle")
+                            .font(Theme.Font.body(.medium))
+                            .foregroundColor(bloc.isClosed ? Theme.Palette.textHint : .orange.opacity(0.7))
                     }
+                    .buttonStyle(.plain)
+                    .disabled(bloc.isClosed)
+                    .help("Close this Bloc — demonstrates lifecycle teardown")
+                    .confirmationDialog(
+                        "Close Bloc?",
+                        isPresented: $showingCloseConfirm,
+                        titleVisibility: .visible
+                    ) {
+                        Button("Close Bloc", role: .destructive) { bloc.close() }
+                        Button("Cancel", role: .cancel) {}
+                    } message: {
+                        Text("Simulates navigating away from a screen with a scoped Bloc. send() and emit() become no-ops, publishers complete, and onClose fires.")
+                    }
+
+                    Button {
+                        withAnimation { log.clear() }
+                    } label: {
+                        Image(systemName: "trash")
+                            .font(Theme.Font.body(.medium))
+                            .foregroundColor(Theme.Palette.textDisabled)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.leading, Theme.Spacing.xxs)
                 }
 
-                // Close bloc button (disabled once already closed)
-                Button {
-                    showingCloseConfirm = true
-                } label: {
-                    Image(systemName: "stop.circle")
-                        .font(Theme.Font.body(.medium))
-                        .foregroundColor(bloc.isClosed ? Theme.Palette.textHint : .orange.opacity(0.7))
+                // Legend pills — own row so they don't crush the title in a narrow panel
+                // (e.g. iPhone Duo's inner display); icon-only if labels still don't fit.
+                ViewThatFits(in: .horizontal) {
+                    legendPills(showLabels: true)
+                    legendPills(showLabels: false)
                 }
-                .buttonStyle(.plain)
-                .disabled(bloc.isClosed)
-                .help("Close this Bloc — demonstrates lifecycle teardown")
-                .confirmationDialog(
-                    "Close Bloc?",
-                    isPresented: $showingCloseConfirm,
-                    titleVisibility: .visible
-                ) {
-                    Button("Close Bloc", role: .destructive) { bloc.close() }
-                    Button("Cancel", role: .cancel) {}
-                } message: {
-                    Text("Simulates navigating away from a screen with a scoped Bloc. send() and emit() become no-ops, publishers complete, and onClose fires.")
-                }
-
-                Button {
-                    withAnimation { log.clear() }
-                } label: {
-                    Image(systemName: "trash")
-                        .font(Theme.Font.body(.medium))
-                        .foregroundColor(Theme.Palette.textDisabled)
-                }
-                .buttonStyle(.plain)
-                .padding(.leading, Theme.Spacing.xxs)
             }
             .padding(.horizontal, Theme.Spacing.lg)
             .padding(.vertical, Theme.Spacing.md)

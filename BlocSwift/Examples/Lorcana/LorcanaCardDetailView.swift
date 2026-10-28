@@ -19,7 +19,8 @@ struct LorcanaCardDetailView: View {
             // Background gradient matching ink colour
             LinearGradient(
                 colors: [
-                    inkColorForCard(card).opacity(0.15),
+                    // Opaque mix — a translucent tint washed out to near-white in light mode
+                    Color(red: 0.06, green: 0.04, blue: 0.12).mix(with: inkColorForCard(card), by: 0.15),
                     Color(red: 0.06, green: 0.04, blue: 0.12),
                     Color(red: 0.08, green: 0.06, blue: 0.14)
                 ],
@@ -64,7 +65,9 @@ struct LorcanaCardDetailView: View {
         }
         .navigationTitle(card.name)
         .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(inkColorForCard(card).opacity(0.3), for: .navigationBar)
+        // Pre-mixed onto the dark base: a translucent tint composited over the light
+        // system backdrop turned bright inks (amber, steel) into a pale bar with white text.
+        .toolbarBackground(Color(red: 0.06, green: 0.04, blue: 0.12).mix(with: inkColorForCard(card), by: 0.3), for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(.dark, for: .navigationBar)
         .tint(.white)
