@@ -126,9 +126,14 @@ private struct MonitorPanel: View {
                     .padding(.top, dense ? Theme.Spacing.xxl : 0)
                 Spacer().frame(height: dense ? Theme.Spacing.xl : Theme.Spacing.xxxl)
                 sessionStats
-                Spacer().frame(height: dense ? Theme.Spacing.xl : Theme.Spacing.huge)
-                explanationCard
-                Spacer().frame(height: dense ? Theme.Spacing.lg : Theme.Spacing.xxl)
+                // Dense: skip the card — the feature banner above already says the same
+                if dense {
+                    Spacer().frame(height: Theme.Spacing.xxl)
+                } else {
+                    Spacer().frame(height: Theme.Spacing.huge)
+                    explanationCard
+                    Spacer().frame(height: Theme.Spacing.xxl)
+                }
                 newSessionButton
                 Spacer()
             }

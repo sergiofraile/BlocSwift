@@ -14,9 +14,7 @@ struct TimerView: View {
     @Environment(\.verticalSizeClass) private var verticalSizeClass
 
     var body: some View {
-        ZStack {
-            background
-
+        Group {
             if verticalSizeClass == .compact {
                 // Landscape: clock on left, controls on right
                 HStack(spacing: Theme.Spacing.xxxl) {
@@ -54,6 +52,10 @@ struct TimerView: View {
                 }
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        // Attached as a background so the 600pt glow can't widen the layout
+        // beyond the screen (it clipped the content on iPhone Duo's cover display).
+        .background { background }
         .navigationTitle("Stopwatch")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(Color(red: 0.04, green: 0.07, blue: 0.06), for: .navigationBar)

@@ -161,9 +161,9 @@ private struct CalculatorPadView: View {
                         bloc.send(.operation(.add))
                     }
                 }
-                // Row 5: 0 (wide), ., ⌫, =
+                // Row 5: 0, ., ⌫, = — same 4 columns as the rows above so the grid lines up
                 HStack(spacing: buttonSpacing) {
-                    CalcButton(label: "0", style: .digit, wide: true) { bloc.send(.digit(0)) }
+                    CalcButton(label: "0", style: .digit) { bloc.send(.digit(0)) }
                     CalcButton(label: ".", style: .digit)  { bloc.send(.decimal) }
                     CalcButton(label: "⌫", style: .function) { bloc.send(.delete) }
                     CalcButton(label: "=", style: .equals)   { bloc.send(.equals) }
@@ -262,7 +262,6 @@ private struct CalcButton: View {
     let label: String
     let style: ButtonStyle
     var isActive: Bool = false
-    var wide: Bool = false
     let action: () -> Void
 
     @State private var isPressed = false
@@ -279,8 +278,7 @@ private struct CalcButton: View {
             Text(label)
                 .font(Theme.Font.title3(labelWeight, .rounded))
                 .foregroundColor(labelColor)
-                .frame(maxWidth: wide ? .infinity : nil)
-                .frame(width: wide ? nil : buttonSize, height: buttonSize)
+                .frame(width: buttonSize, height: buttonSize)
                 .background(
                     RoundedRectangle(cornerRadius: Theme.Radius.xl, style: .continuous)
                         .fill(fillColor)
