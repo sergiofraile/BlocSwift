@@ -49,7 +49,7 @@ struct CounterView: View {
                 HStack(spacing: Theme.Spacing.xxxl) {
                     VStack(spacing: Theme.Spacing.lg) {
                         hydrationBadge
-                        counterCard
+                        counterCard(compact: true)
                     }
                     VStack(spacing: Theme.Spacing.xl) {
                         Spacer()
@@ -60,17 +60,19 @@ struct CounterView: View {
                 }
                 .padding(.horizontal, Theme.Spacing.xxxl)
             } else {
-                // Portrait: stacked
-                VStack(spacing: Theme.Spacing.huge) {
-                    Spacer()
-                    hydrationBadge
-                    counterCard
-                    Spacer()
-                    incrementDecrementRow
-                    resetButtonsStack
-                    Spacer()
+                // Portrait: stacked — tightens up on short screens (e.g. iPhone Duo cover display)
+                HeightAdaptiveStack { dense in
+                    VStack(spacing: dense ? Theme.Spacing.xl : Theme.Spacing.huge) {
+                        Spacer()
+                        hydrationBadge
+                        counterCard(compact: dense)
+                        Spacer()
+                        incrementDecrementRow
+                        resetButtonsStack
+                        Spacer()
+                    }
+                    .padding()
                 }
-                .padding()
             }
         }
         .navigationTitle("Counter")
@@ -88,6 +90,8 @@ struct CounterView: View {
                 .font(Theme.Font.tiny(.semibold))
             Text("HydratedBloc — state persists across launches")
                 .font(Theme.Font.caption(.medium, .monospaced))
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
         }
         .foregroundColor(.cyan.opacity(0.7))
         .padding(.horizontal, 14)
@@ -96,16 +100,15 @@ struct CounterView: View {
         .overlay(Capsule().stroke(Color.cyan.opacity(0.25), lineWidth: 1))
     }
 
-    private var counterCard: some View {
-        let isLandscape = verticalSizeClass == .compact
-        return VStack(spacing: Theme.Spacing.md) {
+    private func counterCard(compact: Bool) -> some View {
+        VStack(spacing: Theme.Spacing.md) {
             Text("COUNTER")
                 .font(Theme.Font.body(.semibold, .monospaced))
                 .tracking(6)
                 .foregroundColor(.cyan.opacity(0.7))
 
             Text("\(counterBloc.state)")
-                .font(Theme.Font.display(isLandscape ? 64 : 96, weight: .thin, design: .rounded))
+                .font(Theme.Font.display(compact ? 64 : 96, weight: .thin, design: .rounded))
                 .foregroundStyle(
                     LinearGradient(
                         colors: [.white, .cyan.opacity(0.8)],
@@ -113,11 +116,11 @@ struct CounterView: View {
                         endPoint: .bottom
                     )
                 )
-                .padding(.vertical, isLandscape ? Theme.Spacing.md : Theme.Spacing.xxl)
+                .padding(.vertical, compact ? Theme.Spacing.md : Theme.Spacing.xxl)
                 .contentTransition(.numericText())
                 .animation(.spring(response: 0.3), value: counterBloc.state)
         }
-        .padding(.vertical, isLandscape ? Theme.Spacing.lg : Theme.Spacing.huge)
+        .padding(.vertical, compact ? Theme.Spacing.lg : Theme.Spacing.huge)
         .padding(.horizontal, 60)
         .background(
             RoundedRectangle(cornerRadius: Theme.Radius.huge)

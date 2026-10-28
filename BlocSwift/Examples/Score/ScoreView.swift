@@ -99,7 +99,7 @@ struct ScoreView: View {
                     HStack(spacing: Theme.Spacing.xxl) {
                         VStack(spacing: Theme.Spacing.lg) {
                             featureBadgeRow
-                            scoreDisplay
+                            scoreDisplay(compact: true)
                         }
                         VStack(spacing: Theme.Spacing.xl) {
                             Spacer()
@@ -111,16 +111,19 @@ struct ScoreView: View {
                     }
                     .padding(.horizontal, 28)
                 } else {
-                    // Portrait: stacked
-                    VStack(spacing: 40) {
-                        Spacer()
-                        featureBadgeRow
-                        scoreDisplay
-                        tierDisplay
-                        Spacer()
-                        actionButtons
+                    // Portrait: stacked — tightens up on short screens (e.g. iPhone Duo cover display)
+                    HeightAdaptiveStack { dense in
+                        VStack(spacing: dense ? Theme.Spacing.xl : 40) {
+                            Spacer()
+                            featureBadgeRow
+                            scoreDisplay(compact: dense)
+                            tierDisplay
+                            Spacer()
+                            actionButtons
+                        }
+                        .padding(.horizontal, 28)
+                        .padding(.bottom, dense ? Theme.Spacing.lg : 0)
                     }
-                    .padding(.horizontal, 28)
                 }
             }
         }
@@ -184,6 +187,8 @@ struct ScoreView: View {
             Text(text)
                 .font(.system(size: 13, weight: .medium, design: .rounded))
                 .foregroundColor(Theme.Palette.textSecondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 6)
@@ -193,7 +198,7 @@ struct ScoreView: View {
 
     // BlocBuilder gives scoreDisplay its own @Observable subscription so it
     // reliably re-renders inside BlocListener's @escaping content closure.
-    private var scoreDisplay: some View {
+    private func scoreDisplay(compact: Bool) -> some View {
         BlocBuilder(ScoreBloc.self) { bloc in
             let tier = Tier(score: bloc.state)
             VStack(spacing: 8) {
@@ -204,7 +209,7 @@ struct ScoreView: View {
 
                 // Numeral gradient shifts with the current tier.
                 Text("\(bloc.state)")
-                    .font(.system(size: verticalSizeClass == .compact ? 64 : 100, weight: .thin, design: .rounded))
+                    .font(.system(size: compact ? 64 : 100, weight: .thin, design: .rounded))
                     .foregroundStyle(
                         LinearGradient(
                             colors: tier.gradientColors,
@@ -220,7 +225,7 @@ struct ScoreView: View {
                     .font(.system(size: 14, weight: .medium, design: .rounded))
                     .foregroundColor(Theme.Palette.textQuaternary)
             }
-            .padding(.vertical, verticalSizeClass == .compact ? 12 : 32)
+            .padding(.vertical, compact ? 12 : 32)
             .padding(.horizontal, 40)
             .background(
                 RoundedRectangle(cornerRadius: 24)

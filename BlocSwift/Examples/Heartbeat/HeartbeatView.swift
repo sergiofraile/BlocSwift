@@ -113,20 +113,28 @@ private struct MonitorPanel: View {
 
     // MARK: Portrait
 
+    // Shrinks the ring and spacing on short screens (e.g. iPhone Duo cover display,
+    // where the feature banner also takes a chunk of the height).
     private var portraitLayout: some View {
-        VStack(spacing: 0) {
-            Spacer()
-            PulseRing(tickCount: bloc.state.tickCount, isClosed: bloc.isClosed)
-                .frame(width: 200, height: 200)
-            Spacer().frame(height: Theme.Spacing.xxxl)
-            sessionStats
-            Spacer().frame(height: Theme.Spacing.huge)
-            explanationCard
-            Spacer().frame(height: Theme.Spacing.xxl)
-            newSessionButton
-            Spacer()
+        HeightAdaptiveStack { dense in
+            VStack(spacing: 0) {
+                Spacer()
+                PulseRing(tickCount: bloc.state.tickCount, isClosed: bloc.isClosed)
+                    .frame(width: 200, height: 200)
+                    .scaleEffect(dense ? 0.7 : 1)
+                    .frame(width: dense ? 140 : 200, height: dense ? 140 : 200)
+                    .padding(.top, dense ? Theme.Spacing.xxl : 0)
+                Spacer().frame(height: dense ? Theme.Spacing.xl : Theme.Spacing.xxxl)
+                sessionStats
+                Spacer().frame(height: dense ? Theme.Spacing.xl : Theme.Spacing.huge)
+                explanationCard
+                Spacer().frame(height: dense ? Theme.Spacing.lg : Theme.Spacing.xxl)
+                newSessionButton
+                Spacer()
+            }
+            .padding(.horizontal, Theme.Spacing.xl)
+            .padding(.bottom, dense ? Theme.Spacing.lg : 0)
         }
-        .padding(.horizontal, Theme.Spacing.xl)
     }
 
     // MARK: Landscape

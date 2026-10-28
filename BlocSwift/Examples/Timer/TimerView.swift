@@ -34,20 +34,24 @@ struct TimerView: View {
                 }
                 .padding(.horizontal, Theme.Spacing.xxl)
             } else {
-                // Portrait: stacked
-                VStack(spacing: 0) {
-                    Spacer()
-                    cubitBadge
-                        .padding(.bottom, Theme.Spacing.xxl)
-                    clockFace
-                        .padding(.bottom, Theme.Spacing.huge)
-                    controls
-                        .padding(.bottom, Theme.Spacing.xxl)
-                    Spacer()
-                    footerNote
-                        .padding(.bottom, Theme.Spacing.xl)
+                // Portrait: stacked — shrinks the clock on short screens (e.g. iPhone Duo cover display)
+                HeightAdaptiveStack { dense in
+                    VStack(spacing: 0) {
+                        Spacer()
+                        cubitBadge
+                            .padding(.bottom, dense ? Theme.Spacing.lg : Theme.Spacing.xxl)
+                        clockFace
+                            .scaleEffect(dense ? 0.8 : 1)
+                            .frame(width: dense ? 240 : 300, height: dense ? 240 : 300)
+                            .padding(.bottom, dense ? Theme.Spacing.xxl : Theme.Spacing.huge)
+                        controls
+                            .padding(.bottom, dense ? Theme.Spacing.lg : Theme.Spacing.xxl)
+                        Spacer()
+                        footerNote
+                            .padding(.bottom, Theme.Spacing.xl)
+                    }
+                    .padding(.horizontal, Theme.Spacing.xxl)
                 }
-                .padding(.horizontal, Theme.Spacing.xxl)
             }
         }
         .navigationTitle("Stopwatch")
@@ -100,6 +104,8 @@ struct TimerView: View {
                 .font(Theme.Font.tiny(.semibold))
             Text("Cubit — no events, direct method calls")
                 .font(Theme.Font.caption(.medium, .monospaced))
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
         }
         .foregroundColor(Color(red: 0.3, green: 0.9, blue: 0.6).opacity(0.8))
         .padding(.horizontal, 14)
@@ -263,10 +269,20 @@ struct TimerView: View {
 
     private var footerNote: some View {
         VStack(spacing: Theme.Spacing.xs) {
-            HStack(spacing: Theme.Spacing.sm) {
-                methodCallChip("timerCubit.start()")
-                methodCallChip("timerCubit.pause()")
-                methodCallChip("timerCubit.reset()")
+            // One row when it fits, otherwise wrap onto two so narrow widths don't clip
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: Theme.Spacing.sm) {
+                    methodCallChip("timerCubit.start()")
+                    methodCallChip("timerCubit.pause()")
+                    methodCallChip("timerCubit.reset()")
+                }
+                VStack(spacing: Theme.Spacing.xs) {
+                    HStack(spacing: Theme.Spacing.sm) {
+                        methodCallChip("timerCubit.start()")
+                        methodCallChip("timerCubit.pause()")
+                    }
+                    methodCallChip("timerCubit.reset()")
+                }
             }
             Text("State managed by TimerCubit — no events, no handlers, no transformers.")
                 .font(Theme.Font.caption(.regular, .rounded))
