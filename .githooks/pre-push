@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Runs the local CI (scripts/ci-local.sh, fast mode) before every push.
+#
+# Enable once per clone:   git config core.hooksPath .githooks
+# Skip one push:           SKIP_LOCAL_CI=1 git push   (or git push --no-verify)
+#
+# A pre-push hook the clone already had in .git/hooks still runs first.
+set -euo pipefail
+
+# git passes the refs being pushed on stdin: "<local ref> <local sha> <remote ref> <remote sha>".
+refs="$(cat)"
+
+legacy="$(git rev-parse --git-common-dir)/hooks/pre-push"
+if [ -x "$legacy" ]; then
+  printf '%s\n' "$refs" | "$legacy" "$@"
+fi
+
+if [ "${SKIP_LOCAL_CI:-0}" = "1" ]; then
+  echo "pre-push: SKIP_LOCAL_CI=1, local CI skipped"
+  exit 0
+fi
+
+# Nothing to check when every pushed ref is a deletion (local sha is all zeros).
+updates=0
+while read -r _local_ref local_sha _remote_ref _remote_sha; do
+  [ -n "${local_sha:-}" ] || continue
+  if [ -n "${local_sha//0/}" ]; then
+    updates=1
+  fi
+done <<<"$refs"
+if [ "$updates" = "0" ]; then
+  exit 0
+fi
+
+root="$(git rev-parse --show-toplevel)"
+echo "pre-push: running scripts/ci-local.sh (SKIP_LOCAL_CI=1 to bypass)"
+if ! "$root/scripts/ci-local.sh" </dev/null; then
+  echo "pre-push: local CI failed, push refused" >&2
+  exit 1
+fi

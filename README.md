@@ -706,6 +706,18 @@ This library is inspired by:
 - [The Composable Architecture](https://github.com/pointfreeco/swift-composable-architecture) - Point-Free's state management library
 - [Redux](https://redux.js.org/) - Predictable state container for JS apps
 
+## Local CI
+
+`scripts/ci-local.sh` runs the checks from `.github/workflows/` on your machine, in the same order: `swift test --configuration release`. `scripts/ci-local.sh --full` adds the DocC docs build. Steps that need macOS or missing tools print `SKIPPED (reason)`.
+
+A pre-push hook in `.githooks/` runs the fast mode. Enable it once per clone:
+
+```sh
+git config core.hooksPath .githooks
+```
+
+Bypass it for one push with `SKIP_LOCAL_CI=1 git push` or `git push --no-verify`.
+
 ## License
 
 This library is released under the Apache 2.0 license. See [LICENSE](LICENSE) for details.
