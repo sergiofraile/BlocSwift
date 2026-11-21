@@ -708,7 +708,7 @@ This library is inspired by:
 
 ## Local CI
 
-`scripts/ci-local.sh` runs the checks from `.github/workflows/` on your machine, in the same order: `swift test --configuration release`. `scripts/ci-local.sh --full` adds the DocC docs build. Steps that need macOS or missing tools print `SKIPPED (reason)`.
+`scripts/ci-local.sh` runs the checks from `.github/workflows/` on your machine, in the same order: `swift test --configuration release --parallel`. `scripts/ci-local.sh --full` adds the DocC docs build. Steps that need macOS or missing tools print `SKIPPED (reason)`.
 
 A pre-push hook in `.githooks/` runs the fast mode. Enable it once per clone:
 
