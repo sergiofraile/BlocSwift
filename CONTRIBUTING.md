@@ -86,20 +86,22 @@ Examples should demonstrate best practices:
 ### Via Command Line (Swift Package)
 
 ```bash
-swift test
+swift test --parallel
 ```
+
+Swift Testing already runs tests in parallel and in random order; `--parallel` also runs any XCTest cases in parallel. Tests must not share state.
 
 ### Via Xcode
 
 Open the package in Xcode and press `⌘U`, or use the **Product → Test** menu.
 
-CI runs `swift test` automatically on every pull request.
+CI runs `swift test --configuration release --parallel` automatically on every pull request (`scripts/ci-local.sh` runs the same locally).
 
 ## Submitting a Pull Request
 
 Before submitting:
 
-- [ ] Tests pass locally (`swift test`)
+- [ ] Tests pass locally (`swift test --parallel`)
 - [ ] New features have corresponding tests
 - [ ] Public APIs have DocC documentation comments
 - [ ] The example app compiles if the library API changed

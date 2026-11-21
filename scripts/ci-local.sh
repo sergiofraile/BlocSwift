@@ -61,15 +61,15 @@ finish() {
 
 if [ "$(uname -s)" != "Darwin" ]; then
   skip "Show Swift version" "needs macOS"
-  skip "Run tests (swift test --configuration release)" "needs macOS"
+  skip "Run tests (swift test --configuration release --parallel)" "needs macOS"
   if [ "$FULL" = 1 ]; then skip "Generate DocC docs (docs.yml)" "needs macOS"; fi
 elif ! have swift; then
   skip "Show Swift version" "swift not installed"
-  skip "Run tests (swift test --configuration release)" "swift not installed"
+  skip "Run tests (swift test --configuration release --parallel)" "swift not installed"
   if [ "$FULL" = 1 ]; then skip "Generate DocC docs (docs.yml)" "swift not installed"; fi
 else
   step "Show Swift version" swift --version
-  step "Run tests (swift test --configuration release)" swift test --configuration release
+  step "Run tests (swift test --configuration release --parallel)" swift test --configuration release --parallel
 
   if [ "$FULL" = 1 ]; then
     # docs.yml writes to ./docs for upload; here the output goes to a temp dir.
