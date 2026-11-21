@@ -11,7 +11,7 @@
 
 ## Checklist
 
-- [ ] `swift test` passes locally
+- [ ] `swift test --parallel` passes locally
 - [ ] New or updated tests cover the change
 - [ ] Public APIs have DocC documentation comments (`///`)
 - [ ] Example app builds if the library API changed
